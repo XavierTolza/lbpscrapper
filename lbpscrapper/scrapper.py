@@ -2,6 +2,7 @@ from time import sleep
 
 from easyscrapper.firefox import Firefox
 from easyscrapper.tools import save
+from lbpscrapper.login_box import LoginBox
 
 
 class LBP(Firefox):
@@ -19,7 +20,7 @@ class LBP(Firefox):
                 self.button_connect.click()
                 sleep(1)
             iframe = self.login_box
-            save(iframe.screenshot_as_png, "/tmp/out.jpg")
+            iframe.numbers_image
             pass
 
     @property
@@ -36,4 +37,5 @@ class LBP(Firefox):
 
     @property
     def login_box(self):
-        return self.find_element_by_css_selector("div.iframe iframe")
+        res = self.find_element_by_css_selector("div.iframe iframe")
+        return LoginBox(res)
