@@ -1,7 +1,6 @@
 from time import sleep
 
 from easyscrapper.firefox import Firefox
-from easyscrapper.tools import save
 from lbpscrapper.login_box import LoginBox
 
 
@@ -10,8 +9,8 @@ class LBP(Firefox):
 
     def __init__(self, username, password, *args, **kwargs):
         super(LBP, self).__init__(*args, **kwargs)
-        self.username = username
-        self.password = password
+        self.username = str(username)
+        self.password = str(password)
 
     def login(self):
         self.get(self.base_url)
@@ -19,8 +18,12 @@ class LBP(Firefox):
             while not self.login_window_visible:
                 self.button_connect.click()
                 sleep(1)
-            iframe = self.login_box
-            iframe.numbers_image
+            lb = self.login_box
+            while not lb.is_ready:
+                sleep(0.5)
+            lb.enter_login(self.username)
+            lb.enter_code(self.password)
+            lb.validate()
             pass
 
     @property
@@ -38,4 +41,4 @@ class LBP(Firefox):
     @property
     def login_box(self):
         res = self.find_element_by_css_selector("div.iframe iframe")
-        return LoginBox(res)
+        return LoginBox(self, res)
