@@ -40,14 +40,17 @@ class LoginBox(object):
         res = imgs[[0, 12, 14, 1, 4, -1, 6, 10, 7, 2]]
         return res
 
-    def get_numbers_position(self):
-        im = self.screenshot
+    def get_button_screenshot(self, button_index):
+        with self.get_into_iframe:
+            return element_screenshot_to_numpy(self.driver.find_element_by_id("val_cel_%i" % button_index))
 
-        imgs = self._cut_screenshot(im)
-        mask = self.numbers_image
-        err = np.abs(imgs[:, None] - mask[None]).sum((2, 3, 4))
+    def get_numbers_position(self):
+        imgs = np.array([self.get_button_screenshot(i) for i in range(16)]).mean(-1)
+        mask = self.numbers_image.mean(-1)
+        err = np.abs(imgs[:, None] - mask[None]).sum((2, 3))
         index = np.argmin(err, axis=1)
-        index[imgs.mean((-1)).std((1, 2)) < 10] = -1
+
+        index[imgs[:, 2:-2, 2:-2].std((1, 2)) < 10] = -1
 
         res = np.sum((np.arange(10)[:, None] == index[None, :]) * np.arange(16)[None, :], axis=1)
         return res
@@ -82,5 +85,7 @@ class LoginBox(object):
             return res
 
     def validate(self):
-        with self.get_into_iframe:
-            self.driver.find_element_by_id("valider").click()
+        self.driver.switch_to.frame(self.element)
+        self.driver.find_element_by_id("valider").click()
+        self.driver.switch_to.default_content()
+        return

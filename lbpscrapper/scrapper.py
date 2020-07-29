@@ -42,3 +42,20 @@ class LBP(Firefox):
     def login_box(self):
         res = self.find_element_by_css_selector("div.iframe iframe")
         return LoginBox(self, res)
+
+    def go_to_e_releves(self):
+        button_css = "div.stripe-footer ul li a"
+        self.wait_for_css_element(button_css)
+        while self.css_element_exists(button_css):
+            self.find_elements_by_css_selector(button_css)[3].click()
+        self.wait_for_css_element("a.collapse__toggle.fix")
+        for el in self.find_elements_by_css_selector("a.collapse__toggle.fix"):
+            el.click()
+
+    @property
+    def ereleves(self):
+        elements = self.find_elements_by_css_selector("ul.mbm.liste-cpte li a")
+        res = [dict(date=i.find_element_by_class_name("date").text,
+                    name=i.find_element_by_css_selector("span").text,
+                    element=i) for i in elements]
+        return res
