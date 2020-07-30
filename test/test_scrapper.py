@@ -14,4 +14,6 @@ class TestLBP(TestCase):
             sleep(1)
             s.go_to_e_releves()
             releves = s.ereleves
-            pass
+            for r in releves:
+                r["element"].click()
+            return
