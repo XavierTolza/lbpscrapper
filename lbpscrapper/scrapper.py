@@ -14,7 +14,7 @@ class LBP(Firefox):
 
     def login(self):
         self.get(self.base_url)
-        if not self.connected:
+        while not self.connected:
             while not self.login_window_visible:
                 self.button_connect.click()
                 sleep(1)
@@ -24,6 +24,7 @@ class LBP(Firefox):
             lb.enter_login(self.username)
             lb.enter_code(self.password)
             lb.validate()
+            self.wait_for_css_element("#verifStatAccount")
             pass
 
     @property
@@ -59,3 +60,13 @@ class LBP(Firefox):
                     name=i.find_element_by_css_selector("span").text,
                     element=i) for i in elements]
         return res
+
+    def parse_accounts(self):
+        accounts = []
+        for account in self.find_elements_by_css_selector(
+                "#main ul.listeDesCartouches li div.account-resume2 div.stripe"):
+            _, name, number = account.find_element_by_css_selector("div.title").text.split(",")
+            number = int(number.replace('N°', ''))
+            amount = float(account.find_element_by_css_selector(".amount").text.split(" ")[0])
+            accounts.append(dict(name=name, number=number, amount=amount))
+        return accounts

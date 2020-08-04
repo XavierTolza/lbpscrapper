@@ -12,6 +12,7 @@ class TestLBP(TestCase):
         with LBP(user, passw, headless=False) as s:
             s.login()
             sleep(1)
+            accounts = s.parse_accounts()
             s.go_to_e_releves()
             releves = s.ereleves
             for r in releves:
