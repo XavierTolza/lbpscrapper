@@ -9,7 +9,7 @@ class TestLBP(TestCase):
     def test_001(self):
         user = os.getenv("USER")
         passw = os.getenv("PASS")
-        with LBP(user, passw, headless=False) as s:
+        with LBP(user, passw, headless=False, download_dir="C:\\Users\\Xavier\\Downloads") as s:
             s.login()
             sleep(1)
             accounts = s.parse_accounts()

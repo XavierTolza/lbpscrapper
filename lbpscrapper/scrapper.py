@@ -1,5 +1,6 @@
 import re
 from glob import glob
+from os.path import join
 from time import sleep
 
 from selenium.common.exceptions import NoSuchElementException
@@ -101,7 +102,7 @@ class LBP(Firefox):
                 break
 
         # Search for filename
-        filename_glob = f'releve_CCP{account_number}_{year}{month}*.pdf'
+        filename_glob = join(self.download_dir, f'releve_CCP{account_number}_{year}{month}*.pdf')
 
         if not self.file_glob_exists(filename_glob)[0]:
             releve["element"].click()
