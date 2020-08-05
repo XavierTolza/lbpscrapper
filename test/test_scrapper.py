@@ -16,5 +16,5 @@ class TestLBP(TestCase):
             s.go_to_e_releves()
             releves = s.ereleves
             for r in releves:
-                r["element"].click()
+                s.download_releve_if_not_downloaded(r, accounts)
             return

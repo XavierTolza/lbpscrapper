@@ -1,4 +1,8 @@
+import re
+from glob import glob
 from time import sleep
+
+from selenium.common.exceptions import NoSuchElementException
 
 from easyscrapper.firefox import Firefox
 from lbpscrapper.login_box import LoginBox
@@ -24,12 +28,17 @@ class LBP(Firefox):
             lb.enter_login(self.username)
             lb.enter_code(self.password)
             lb.validate()
-            self.wait_for_css_element("#verifStatAccount")
+            self.wait_for_css_element("i.icon-user")
             pass
 
     @property
     def button_connect(self):
-        return self.find_element_by_id("verifStatAccount")
+        res = None
+        try:
+            res = self.find_element_by_id("verifStatAccount")
+        except NoSuchElementException:
+            pass
+        return res
 
     @property
     def login_window_visible(self):
@@ -37,7 +46,10 @@ class LBP(Firefox):
 
     @property
     def connected(self):
-        return not (self.button_connect.text == "ME CONNECTER")
+        but = self.button_connect
+        if but is None:
+            return True
+        return not (but.text == "ME CONNECTER")
 
     @property
     def login_box(self):
@@ -65,8 +77,37 @@ class LBP(Firefox):
         accounts = []
         for account in self.find_elements_by_css_selector(
                 "#main ul.listeDesCartouches li div.account-resume2 div.stripe"):
-            _, name, number = account.find_element_by_css_selector("div.title").text.split(",")
-            number = int(number.replace('N°', ''))
-            amount = float(account.find_element_by_css_selector(".amount").text.split(" ")[0])
+            _, name, number = account.find_element_by_css_selector("div.title").text.split("\n")
+            number = number.replace('N°', '')
+            amount = float("".join(account.find_element_by_css_selector(".amount")
+                                   .text.split(" ")[:-1]).replace(",", "."))
             accounts.append(dict(name=name, number=number, amount=amount))
         return accounts
+
+    def file_glob_exists(self, file_glob):
+        matching_files = list(glob(file_glob))
+        file_exists = len(matching_files) > 0
+        return file_exists, matching_files
+
+    def download_releve_if_not_downloaded(self, releve, accounts):
+        date = releve["date"]
+        month, year = date.split("/")
+
+        # Find account number
+        account_name = re.match("RELEVÉ (.+) (CCP )?[0-9/]", releve["name"]).group(1)
+        for account in accounts:
+            if account["name"] in account_name:
+                account_number = account["number"]
+                break
+
+        # Search for filename
+        filename_glob = f'releve_CCP{account_number}_{year}{month}*.pdf'
+
+        if not self.file_glob_exists(filename_glob)[0]:
+            releve["element"].click()
+
+        while not self.file_glob_exists(filename_glob)[0]:
+            sleep(0.5)
+
+        res = self.file_glob_exists(filename_glob)[1]
+        return res
