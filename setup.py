@@ -4,11 +4,11 @@
 from glob import glob
 
 info = dict(
-    packages=["easy_scrapper"],  # La liste des dossiers contenant les modules python (généralement un seul)
+    packages=["lbpscrapper"],  # La liste des dossiers contenant les modules python (généralement un seul)
     # Le nom du projet python (généralement le nom du dossier unique où est stocké le projet)
-    name="Easy Scrapper",
+    name="LBP scrapper",
     version='0.1',  # La version du code
-    description='Selenium based scrapper, made for easy developments',
+    description='Scrapper for La banque postale',
     # La description du paquet
     author='Xavier Tolza',  # Auteur du paquet
     author_email='tolza.xavier@gmail.com',  # email de l'auteur
