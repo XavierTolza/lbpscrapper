@@ -3,6 +3,7 @@ import os
 from argparse import ArgumentParser
 from datetime import datetime
 from email.mime.base import MIMEBase
+from logging import DEBUG
 from os import makedirs
 from os.path import isdir, join
 from traceback import format_exc
@@ -28,7 +29,8 @@ if __name__ == '__main__':
     log_file = os.path.abspath(log_file)
 
     try:
-        with LBP(args.user, args.passw, headless=False, download_dir=args.download_dir, log_file=log_file) as s:
+        with LBP(args.user, args.passw, headless=False, download_dir=args.download_dir, log_file=log_file,
+                 log_level_console=DEBUG) as s:
             s.login()
             accounts = s.parse_accounts()
             s.go_to_e_releves()
