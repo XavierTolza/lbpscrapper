@@ -18,6 +18,7 @@ class LBP(Firefox):
         self.password = str(password)
 
     def login(self):
+        self.info("Trying to login")
         self.get(self.base_url)
         while not self.connected:
             while not self.login_window_visible:
@@ -38,6 +39,7 @@ class LBP(Firefox):
         try:
             res = self.find_element_by_id("verifStatAccount")
         except NoSuchElementException:
+            self.warning("Button connect not found")
             pass
         return res
 
@@ -58,6 +60,7 @@ class LBP(Firefox):
         return LoginBox(self, res)
 
     def go_to_e_releves(self):
+        self.info("Going to e-releve page")
         button_css = "div.stripe-footer ul li a"
         self.wait_for_css_element(button_css)
         while self.css_element_exists(button_css):
@@ -105,10 +108,15 @@ class LBP(Firefox):
         filename_glob = join(self.download_dir, f'releve_CCP{account_number}_{year}{month}*.pdf')
 
         if not self.file_glob_exists(filename_glob)[0]:
+            self.info("Downloading e-releve for %s with filename %s" % (releve["date"], filename_glob))
             releve["element"].click()
+        else:
+            self.debug("Asked to download e-releve for %s but it already exists! (filename %s)"
+                       % (releve["date"], filename_glob))
 
+        self.debug("Waiting for download to finish")
         while not self.file_glob_exists(filename_glob)[0]:
-            sleep(0.5)
+            sleep(0.1)
 
         res = self.file_glob_exists(filename_glob)[1]
         return res
