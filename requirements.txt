@@ -1,2 +1,3 @@
 numpy
+imageio
 git+https://github.com/XavierTolza/easyscrapper.git#egg=easyscrapper
