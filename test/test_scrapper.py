@@ -2,14 +2,14 @@ import os
 from time import sleep
 from unittest import TestCase
 
-from lbpscrapper.scrapper import LBP
+from lbpscrapper.scrapper import LBPChromium, LBPFirefox
 
 
 class TestLBP(TestCase):
-    def test_001(self):
+    def test_chromium(self, cls=LBPChromium):
         user = os.getenv("USER")
         passw = os.getenv("PASS")
-        with LBP(user, passw, headless=False, download_dir="C:\\Users\\Xavier\\Downloads") as s:
+        with cls(user, passw, headless=False, download_dir="C:\\Users\\Xavier\\Downloads") as s:
             s.login()
             sleep(1)
             accounts = s.parse_accounts()
@@ -18,3 +18,6 @@ class TestLBP(TestCase):
             for r in releves:
                 s.download_releve_if_not_downloaded(r, accounts)
             return
+
+    def test_firefox(self):
+        self.test_chromium(LBPFirefox)

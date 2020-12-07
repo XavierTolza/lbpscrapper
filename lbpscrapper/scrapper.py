@@ -5,15 +5,15 @@ from time import sleep
 
 from selenium.common.exceptions import NoSuchElementException
 
+from easyscrapper.chromium import Chromium
 from easyscrapper.firefox import Firefox
 from lbpscrapper.login_box import LoginBox
 
 
-class LBP(Firefox):
+class LBP(object):
     base_url = "https://www.labanquepostale.fr/"
 
     def __init__(self, username, password, *args, **kwargs):
-        super(LBP, self).__init__(*args, **kwargs)
         self.username = str(username)
         self.password = str(password)
 
@@ -57,7 +57,11 @@ class LBP(Firefox):
     @property
     def login_box(self):
         res = self.find_element_by_css_selector("div.iframe iframe")
-        return LoginBox(self, res)
+        return LoginBox(self, res, **self.login_box_kwargs)
+
+    @property
+    def login_box_kwargs(self):
+        return {}
 
     def go_to_e_releves(self):
         self.info("Going to e-releve page")
@@ -120,3 +124,19 @@ class LBP(Firefox):
 
         res = self.file_glob_exists(filename_glob)[1]
         return res
+
+
+class LBPFirefox(LBP, Firefox):
+    def __init__(self, username, password, *args, **kwargs):
+        LBP.__init__(self, username, password)
+        Firefox.__init__(self, *args, **kwargs)
+
+    @property
+    def login_box_kwargs(self):
+        return dict(buttons_screenshot_kwargs=dict(offset_x=45, offset_y=6))
+
+
+class LBPChromium(LBP, Chromium):
+    def __init__(self, username, password, *args, **kwargs):
+        LBP.__init__(self, username, password)
+        Chromium.__init__(self, *args, **kwargs)

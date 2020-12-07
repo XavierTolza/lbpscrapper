@@ -12,7 +12,8 @@ class LoginBox(object):
     offset = (145, 87)
     interspace = 48
 
-    def __init__(self, driver, element):
+    def __init__(self, driver, element, buttons_screenshot_kwargs: dict = {}):
+        self.buttons_screenshot_kwargs = buttons_screenshot_kwargs
         self.driver = driver
         self.element = element
 
@@ -44,9 +45,27 @@ class LoginBox(object):
         with self.get_into_iframe:
             return element_screenshot_to_numpy(self.driver.find_element_by_id("val_cel_%i" % button_index))
 
+    def get_buttons_screenshot(self, offset_x=46, offset_y=7, size_x=45, size_y=45, margin_x=3, margin_y=3, N_x=4,
+                               N_y=4):
+        full_x = size_x + margin_x
+        full_y = size_y + margin_y
+        stop_x = offset_x + full_x * N_x
+        stop_y = offset_y + full_x * N_y
+        # imgs = np.array([self.get_button_screenshot(i) for i in range(16)])
+        # return imgs
+        with self.get_into_iframe:
+            img = element_screenshot_to_numpy(self.driver.find_element_by_id("blocImage"))
+            padding = np.ones((stop_y - img.shape[0],) + img.shape[1:], dtype=np.uint8) * 255
+            img = np.concatenate([img, padding], axis=0)
+            img_cut = img[offset_y:stop_y, offset_x:stop_x]
+            img_reshaped = img_cut.reshape((N_y, full_y, N_x, full_x, -1))
+            img_reshaped_cut = img_reshaped[:, :size_y, :, :size_x]
+        return np.moveaxis(img_reshaped_cut, 2, 1)
+
     def get_numbers_position(self):
-        imgs = np.array([self.get_button_screenshot(i) for i in range(16)]).mean(-1)
         mask = self.numbers_image.mean(-1)
+        imgs = self.get_buttons_screenshot(**self.buttons_screenshot_kwargs).mean(-1)
+        imgs = imgs.reshape((4 * 4,) + mask.shape[-2:])
         err = np.abs(imgs[:, None] - mask[None]).sum((2, 3))
         index = np.argmin(err, axis=1)
 
